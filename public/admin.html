@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; background-color: #f4f4f9; }
+        .card { background: white; max-width: 450px; margin: auto; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .stat-box { font-size: 18px; margin: 10px 0; padding: 8px; background: #e9ecef; border-radius: 5px; }
+        #user-list { list-style: none; padding: 0; max-height: 200px; overflow-y: auto; text-align: left; margin-top: 10px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
+        #user-list li { padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Admin Dashboard</h2>
+        <p>සජීවී පරිශීලක සංඛ්‍යාලේඛන</p>
+
+        <div class="stat-box">
+            🌐 මුළු Online පිරිස: <span id="total-users" style="font-weight: bold; color: #007bff;">0</span>
+        </div>
+        <div class="stat-box">
+            👨 පුරුෂයින් (Male): <span id="male-users" style="font-weight: bold; color: #28a745;">0</span>
+        </div>
+        <div class="stat-box">
+            👩 ස්ත්‍රීන් (Female): <span id="female-users" style="font-weight: bold; color: #dc3545;">0</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3>Online සිටින පරිශීලකයින්</h3>
+        <ul id="user-list">
+            <li style="color: #777; text-align: center;">පරිශීලකයින් නොමැත...</li>
+        </ul>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        const socket = io();
+
+        const totalUsersEl = document.getElementById('total-users');
+        const maleUsersEl = document.getElementById('male-users');
+        const femaleUsersEl = document.getElementById('female-users');
+        const userListEl = document.getElementById('user-list');
+
+        socket.on('connect', () => {
+            console.log("Admin connected to socket server, ID:", socket.id);
+        });
+
+        socket.on('update-stats', (stats) => {
+            console.log("Stats received:", stats);
+            totalUsersEl.innerText = stats.total;
+            maleUsersEl.innerText = stats.male;
+            femaleUsersEl.innerText = stats.female;
+
+            userListEl.innerHTML = '';
+            
+            const users = stats.activeUsers;
+            if (!users || Object.keys(users).length === 0) {
+                userListEl.innerHTML = '<li style="color: #777; text-align: center;">පරිශීලකයින් නොමැත...</li>';
+                return;
+            }
+
+            for (let id in users) {
+                let gender = users[id];
+                let badgeColor = gender === 'Male' ? '#28a745' : (gender === 'Female' ? '#dc3545' : '#6c757d');
+                
+                userListEl.innerHTML += `
+                    <li style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>ID: <code>${id.substring(0, 8)}...</code></span>
+                        <span style="background: ${badgeColor}; color: white; padding: 2px 8px; border-radius: 4px; font-weight: bold; font-size: 12px;">
+                            ${gender}
+                        </span>
+                    </li>`;
+            }
+        });
+    </script>
+</body>
+</html>
+

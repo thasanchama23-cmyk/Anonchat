@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AnonChat - Admin Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f4f6f9; padding: 30px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: white; width: 100%; max-width: 450px; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; text-align: center; }
+        h2 { color: #333; margin-bottom: 5px; }
+        p { color: #666; font-size: 14px; margin-bottom: 15px; }
+        .stat-box { font-size: 16px; margin: 10px 0; padding: 12px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #e9ecef; }
+        #user-list { list-style: none; padding: 0; max-height: 220px; overflow-y: auto; text-align: left; margin-top: 10px; border: 1px solid #e9ecef; border-radius: 8px; background: #fafbfc; }
+        #user-list li { padding: 10px 14px; border-bottom: 1px solid #eee; font-size: 13px; display: flex; justify-content: space-between; align-items: center; }
+        #user-list li:last-child { border-bottom: none; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Admin Dashboard</h2>
+        <p>Live Statistics & Active Users</p>
+
+        <div class="stat-box">
+            <span>🌐 Total Online:</span> 
+            <span id="total-users" style="font-weight: bold; color: #4a3fef;">0</span>
+        </div>
+        <div class="stat-box">
+            <span>👨 Male Users:</span> 
+            <span id="male-users" style="font-weight: bold; color: #28a745;">0</span>
+        </div>
+        <div class="stat-box">
+            <span>👩 Female Users:</span> 
+            <span id="female-users" style="font-weight: bold; color: #dc3545;">0</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h3 style="font-size: 18px; color: #333; margin-bottom: 10px;">Active Users List</h3>
+        <ul id="user-list">
+            <li style="color: #777; text-align: center; display: block;">No active users...</li>
+        </ul>
+    </div>
+
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script>
+        const socket = io();
+
+        const totalUsersEl = document.getElementById('total-users');
+        const maleUsersEl = document.getElementById('male-users');
+        const femaleUsersEl = document.getElementById('female-users');
+        const userListEl = document.getElementById('user-list');
+
+        socket.on('update-stats', (stats) => {
+            totalUsersEl.innerText = stats.total;
+            maleUsersEl.innerText = stats.male;
+            femaleUsersEl.innerText = stats.female;
+
+            userListEl.innerHTML = '';
+            
+            const users = stats.activeUsers;
+            if (!users || Object.keys(users).length === 0) {
+                userListEl.innerHTML = '<li style="color: #777; text-align: center; display: block;">No active users...</li>';
+                return;
+            }
+
+            for (let id in users) {
+                let gender = users[id];
+                let badgeColor = gender === 'Male' ? '#28a745' : (gender === 'Female' ? '#dc3545' : '#6c757d');
+                
+                userListEl.innerHTML += `
+                    <li>
+                        <span>ID: <code>${id.substring(0, 8)}...</code></span>
+                        <span style="background: ${badgeColor}; color: white; padding: 3px 8px; border-radius: 4px; font-weight: bold; font-size: 11px;">
+                            ${gender}
+                        </span>
+                    </li>`;
+            }
+        });
+    </script>
+</body>
+</html>
+
+
+
