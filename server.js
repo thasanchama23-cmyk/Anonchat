@@ -91,16 +91,17 @@ function getLocalIp() {
     return 'localhost';
 }
 
-server.listen(3000, '0.0.0.0', () => {
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, '0.0.0.0', () => {
     const ip = getLocalIp();
     console.log('--------------------------------------------------');
     console.log('🚀 Server eka saarthakawa kriyathmakai!');
     console.log('📱 User Chat Site ekata yanna:');
-    console.log(`   Local:  http://localhost:3000`);
-    console.log(`   Network: http://${ip}:3000`);
+    console.log(`   Local:  http://localhost:${PORT}`);
+    console.log(`   Network: http://${ip}:${PORT}`);
     console.log('👑 Admin Dashboard ekata yanna:');
-    console.log(`   Local:  http://localhost:3000/admin.html`);
-    console.log(`   Network: http://${ip}:3000/admin.html`);
+    console.log(`   Local:  http://localhost:${PORT}/admin.html`);
+    console.log(`   Network: http://${ip}:${PORT}/admin.html`);
     console.log('--------------------------------------------------');
 });
 
